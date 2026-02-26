@@ -1,44 +1,37 @@
-# SoarSeek
+# useAsset
 ![Logo](logo.jpg)
 
 ## 简介
-SoarSeek 是一个高效、灵活的搜索工具/库，旨在提供快速、准确的信息检索能力。它设计用于处理各种复杂的搜索场景，帮助用户快速定位所需信息。
+useAsset 是一个轻量、高效的前端资源管理钩子，旨在简化 React 应用中静态资源的加载、缓存和使用。它设计用于处理各种资源类型，包括图片、字体、音频、视频等，提供统一的资源管理接口。
 
 ## 功能特性
 
-- **高性能搜索**：采用先进的索引和检索算法，确保快速响应
-- **灵活配置**：支持多种搜索参数和选项，满足不同场景需求
-- **多数据源支持**：可对接多种数据源，包括数据库、文件系统等
-- **实时索引**：支持实时数据索引，确保搜索结果的及时性
-- **自定义分词**：提供可定制的分词器，适应不同语言和领域
-- **丰富的 API**：简洁易用的 API 接口，方便集成到各种应用中
+- **统一资源管理**：提供一致的 API 接口处理不同类型的资源
+- **智能缓存**：自动缓存已加载的资源，提高性能和用户体验
+- **懒加载支持**：支持资源懒加载，减少初始加载时间
+- **错误处理**：内置资源加载错误处理机制
+- **类型安全**：提供完整的 TypeScript 类型定义
+- **响应式设计**：与 React 组件生命周期无缝集成
+- **资源预加载**：支持资源预加载功能，提升用户体验
 
 ## 安装指南
 
 ### 前提条件
 
-- Node.js 14.0+ (如果是前端/Node.js 项目)
-- Python 3.7+ (如果是 Python 项目)
-- Go 1.16+ (如果是 Go 项目)
+- React 16.8+ (支持 Hooks)
+- Node.js 12.0+
 
 ### 安装步骤
 
 ```bash
-# 克隆仓库
-git clone https://github.com/yourusername/soarseek.git
+# 使用 npm 安装
+npm install useasset
 
-# 进入项目目录
-cd soarseek
+# 使用 yarn 安装
+yarn add useasset
 
-# 安装依赖
-# 如果是 Node.js 项目
-npm install
-
-# 如果是 Python 项目
-pip install -r requirements.txt
-
-# 如果是 Go 项目
-go mod download
+# 使用 pnpm 安装
+pnpm add useasset
 ```
 
 ## 快速开始
@@ -46,125 +39,158 @@ go mod download
 ### 基本用法
 
 ```javascript
-// Node.js 示例
-const SoarSeek = require('soarseek');
+// 导入 useAsset 钩子
+import { useAsset } from 'useasset';
 
-// 初始化搜索实例
-const searcher = new SoarSeek({
-  indexPath: './index',
-  // 其他配置选项
-});
+function ImageComponent() {
+  // 加载图片资源
+  const { asset, loading, error } = useAsset('/path/to/image.jpg');
 
-// 执行搜索
-const results = await searcher.search('关键词');
-console.log(results);
+  if (loading) {
+    return <div>加载中...</div>;
+  }
+
+  if (error) {
+    return <div>加载失败</div>;
+  }
+
+  return <img src={asset} alt="示例图片" />;
+}
 ```
 
-```python
-# Python 示例
-from soarseek import SoarSeek
+```javascript
+// 加载字体资源
+import { useAsset } from 'useasset';
 
-# 初始化搜索实例
-searcher = SoarSeek(
-    index_path='./index',
-    # 其他配置选项
-)
+function FontComponent() {
+  const { asset, loading, error } = useAsset('/path/to/font.woff2', {
+    type: 'font',
+    preload: true
+  });
 
-# 执行搜索
-results = searcher.search('关键词')
-print(results)
-```
+  // 字体加载后应用
+  if (asset) {
+    // 应用字体逻辑
+  }
 
-```go
-// Go 示例
-import "github.com/yourusername/soarseek"
-
-// 初始化搜索实例
-searcher := soarseek.New(soarseek.Options{
-    IndexPath: "./index",
-    // 其他配置选项
-})
-
-// 执行搜索
-results := searcher.Search("关键词")
-fmt.Println(results)
+  return <div>字体示例</div>;
+}
 ```
 
 ## 配置选项
 
 | 选项 | 类型 | 描述 | 默认值 |
 |------|------|------|--------|
-| `indexPath` | string | 索引存储路径 | "./index" |
-| `maxResults` | number | 最大返回结果数 | 10 |
-| `minScore` | number | 最小匹配分数 | 0.3 |
-| `language` | string | 语言设置 | "en" |
-| `enableStemming` | boolean | 是否启用词干提取 | true |
+| `type` | string | 资源类型 ('image', 'font', 'audio', 'video', 'other') | 'other' |
+| `preload` | boolean | 是否预加载资源 | false |
+| `cache` | boolean | 是否缓存资源 | true |
+| `crossOrigin` | string | 跨域设置 | undefined |
+| `onLoad` | function | 资源加载完成回调 | undefined |
+| `onError` | function | 资源加载错误回调 | undefined |
 
 ## 高级用法
 
-### 自定义索引
+### 批量资源加载
 
 ```javascript
-// 创建自定义索引
-await searcher.createIndex(data, {
-  fields: ['title', 'content', 'tags'],
-  // 其他索引选项
-});
+import { useAssets } from 'useasset';
+
+function GalleryComponent() {
+  // 批量加载图片资源
+  const { assets, loading, errors } = useAssets([
+    '/path/to/image1.jpg',
+    '/path/to/image2.jpg',
+    '/path/to/image3.jpg'
+  ], {
+    type: 'image',
+    preload: true
+  });
+
+  if (loading) {
+    return <div>加载中...</div>;
+  }
+
+  if (errors.length > 0) {
+    return <div>部分资源加载失败</div>;
+  }
+
+  return (
+    <div className="gallery">
+      {assets.map((asset, index) => (
+        <img key={index} src={asset} alt={`图片 ${index + 1}`} />
+      ))}
+    </div>
+  );
+}
 ```
 
-### 高级搜索
+### 资源预加载
 
 ```javascript
-// 高级搜索选项
-const results = await searcher.search('关键词', {
-  fields: ['title', 'content'], // 指定搜索字段
-  filters: { category: 'tech' }, // 添加过滤条件
-  sortBy: 'relevance', // 排序方式
-  // 其他搜索选项
-});
+import { preloadAsset } from 'useasset';
+
+// 在应用启动时预加载关键资源
+function App() {
+  useEffect(() => {
+    // 预加载关键图片
+    preloadAsset('/path/to/critical-image.jpg', { type: 'image' });
+    // 预加载字体
+    preloadAsset('/path/to/font.woff2', { type: 'font' });
+  }, []);
+
+  return <div>应用内容</div>;
+}
 ```
 
 ## API 文档
 
-### `search(query, options)`
+### `useAsset(url, options)`
 
-执行搜索查询。
-
-- **参数**：
-  - `query` (string): 搜索关键词
-  - `options` (object): 搜索选项
-- **返回值**：
-  - `Promise<Array>`: 搜索结果数组
-
-### `createIndex(data, options)`
-
-创建搜索索引。
+加载单个资源。
 
 - **参数**：
-  - `data` (Array): 要索引的数据
-  - `options` (object): 索引选项
+  - `url` (string): 资源 URL
+  - `options` (object): 配置选项
 - **返回值**：
-  - `Promise<void>`
+  - `asset` (string | undefined): 加载完成的资源 URL
+  - `loading` (boolean): 是否正在加载
+  - `error` (Error | null): 加载错误信息
 
-### `updateIndex(data)`
+### `useAssets(urls, options)`
 
-更新现有索引。
+批量加载多个资源。
 
 - **参数**：
-  - `data` (Array): 要更新的数据
+  - `urls` (string[]): 资源 URL 数组
+  - `options` (object): 配置选项
 - **返回值**：
-  - `Promise<void>`
+  - `assets` (string[]): 加载完成的资源 URL 数组
+  - `loading` (boolean): 是否正在加载
+  - `errors` (Error[]): 加载错误信息数组
 
-### `deleteIndex()`
+### `preloadAsset(url, options)`
 
-删除现有索引。
+预加载单个资源。
 
+- **参数**：
+  - `url` (string): 资源 URL
+  - `options` (object): 配置选项
 - **返回值**：
-  - `Promise<void>`
+  - `Promise<string>`: 资源加载完成的 Promise
+
+### `preloadAssets(urls, options)`
+
+批量预加载多个资源。
+
+- **参数**：
+  - `urls` (string[]): 资源 URL 数组
+  - `options` (object): 配置选项
+- **返回值**：
+  - `Promise<string[]>`: 所有资源加载完成的 Promise
 
 ## 贡献指南
 
-我们欢迎社区贡献！如果您想参与 SoarSeek 的开发，请按照以下步骤操作：
+我们欢迎社区贡献！如果您想参与 useAsset 的开发，请按照以下步骤操作：
 
 1. Fork 仓库
 2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
@@ -174,18 +200,18 @@ const results = await searcher.search('关键词', {
 
 ## 问题反馈
 
-如果您在使用过程中遇到问题，请在 GitHub 仓库的 [Issues](https://github.com/yourusername/soarseek/issues) 页面提交问题描述。
+如果您在使用过程中遇到问题，请在 GitHub 仓库的 [Issues](https://github.com/yourusername/useasset/issues) 页面提交问题描述。
 
 ## 许可证
 
-SoarSeek 采用 [MIT 许可证](LICENSE)。详情请参阅 LICENSE 文件。
+useAsset 采用 [MIT 许可证](LICENSE)。详情请参阅 LICENSE 文件。
 
 ## 联系方式
 
 - 项目维护者：[Your Name](https://github.com/yourusername)
 - 电子邮件：your.email@example.com
-- 项目链接：[https://github.com/yourusername/soarseek](https://github.com/yourusername/soarseek)
+- 项目链接：[https://github.com/yourusername/useasset](https://github.com/yourusername/useasset)
 
 ---
 
-**享受搜索的乐趣！** 🚀
+**享受资源管理的便捷！** 🚀
